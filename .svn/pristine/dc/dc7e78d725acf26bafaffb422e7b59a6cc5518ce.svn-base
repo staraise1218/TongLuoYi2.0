@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 故障设备维修明细 -->
+<mapper namespace="com.tly.dao.IEquipmentMaintenanceDao">
+	<!-- 查询维修明细 -->
+	<select id="selectByEm" resultType="java.util.HashMap">
+		select e.name as name,es.number as number,s.address as address,p.name as pname,p.wxid as wxid,p.phonenum as phonenum,em.gzdescribe as des,em.judge as judge,em.record as record,em.result as result
+		from equipment as e 
+		left join equipmentsublist as es on e.id = es.eid
+		left join partnerequipment as pe on pe.eid = es.id
+		left join partner as p on pe.pid = p.id
+		left join equipmentmaintenance as em on p.id = em.pid
+		left join shop as s on p.id = s.pid
+		where em.emid <![CDATA[ <> ]]> ''
+	</select>
+	<!-- 查询没有处理的工单 -->
+	<select id="selectByNotWid" resultType="com.tly.model.EquipmentMaintenance">
+		select * from equipmentmaintenance where wid is null and DATE_SUB(CURDATE(), INTERVAL 6 DAY) <![CDATA[ <= ]]> date(startime)
+	</select>
+	<!-- 接单 -->
+	<update id="updatewid" parameterType="com.tly.model.EquipmentMaintenance">
+		update equipmentmaintenance set wid = #{wid} where emid = #{emid}
+	</update>
+	<!-- 修改维修结果 -->
+	<update id="updateresult" parameterType="com.tly.model.EquipmentMaintenance">
+		update equipmentmaintenance set judge=#{judge},record=#{record},result=#{result},endtime=#{endtime} where emid = #{emid}
+	</update>
+	<!-- 按工程师id查询维修明细 -->
+	<select id="selectBywid" parameterType="java.lang.Integer" resultType="java.util.HashMap">
+		select e.name as name,es.number as number,s.address as address,p.name as pname,p.wxid as wxid,p.phonenum as phonenum,em.gzdescribe as des,em.judge as judge,em.record as record,em.result as result
+		from equipment as e 
+		left join equipmentsublist as es on e.id = es.eid
+		left join partnerequipment as pe on pe.eid = es.id
+		left join partner as p on pe.pid = p.id
+		left join equipmentmaintenance as em on p.id = em.pid
+		left join shop as s on p.id = s.pid
+		where em.wid = #{wid} and em.endtime is null
+	</select>
+	<!-- 查询故障维修明细未读  -->
+	<select id="selectByNotLook" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from equipmentmaintenance where wid = #{wid} and look = 2
+	</select>
+	<!-- 修改维修明细为已读 -->
+	<update id="updatelook" parameterType="java.lang.Integer">
+		update equipmentmaintenance set look = 1 where wid = #{wid}
+	</update>
+	<!-- 查询共享数据的未读数量 -->
+	<select id="selectByGxNotLook" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from equipmentmaintenance as em
+		where em.emid not in (select emid from memcorresponding as m where m.mid = #{wid}) and em.wid is null
+	</select>
+	<!-- 查询共享的未读数据 -->
+	<select id="selectByGxNotLookByEm" parameterType="java.lang.Integer" resultType="com.tly.model.EquipmentMaintenance">
+		select * from equipmentmaintenance as em
+		where em.emid not in (select emid from memcorresponding as m where m.mid = #{wid}) and em.wid is null
+	</select>
+	<!-- 申报故障 -->
+	<insert id="insertByEm" parameterType="com.tly.model.EquipmentMaintenance">
+		insert into equipmentmaintenance(pid,eid,gzdescribe,lxname,lxphonenum) values(#{pid},#{eid},#{gzdescribe},#{lxname},#{lxphonenum})
+	</insert>
+</mapper>

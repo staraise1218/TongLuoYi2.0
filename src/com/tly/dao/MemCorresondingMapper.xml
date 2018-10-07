@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 维修工单和维修人员对应查看已读或未读 -->
+<mapper namespace="com.tly.dao.IMemCorresondingDao">
+	<!-- 新增对应关系 -->
+	<insert id="insert" parameterType="com.tly.model.MemCorresonding">
+		insert into memcorresponding(mid,emid) values(#{mid},#{emid})
+	</insert>
+</mapper>

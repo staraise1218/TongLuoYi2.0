@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 合伙人 -->
+<mapper namespace="com.tly.dao.IPartnerDao">
+	<!-- 查询合伙人详情 -->
+	<select id="selectByPartner" resultType="java.util.HashMap">
+		select p.id as pid,p.wxid as wxid,p.nickname as nickname,p.name as name,p.sex as sex,p.date as date,p.phonenum as phonenum,p.city as city,
+			if((select status from partnerequipment as p1 where status=1 and pid = p.id)=1 and 
+			(select status from partnerequipment as p1 where status=2 and pid = p.id) = 2,'租用+购买',
+			if((select status from partnerequipment as p1 where status=1 and pid = p.id)=1,'租用','购买')) as form,
+			p.plid as plid,mw.money as money
+			from partner as p 
+			left join memberwallet as mw on p.wxid = mw.wxid
+			left join partnerequipment as pe on p.id = pe.pid
+			group by pe.pid
+	</select>
+	<!-- 查询该设备租用者微信id-->
+	<select id="selectPeoByEquipmentnumber" parameterType="java.lang.String" resultType="java.lang.String">
+		select wxid from partner where id = (select pid from partnerequipment where eid = (select id from equipmentsublist where number = #{equipmentnumber}))
+	</select>
+	<!-- 按微信id查询 -->
+	<select id="selectByWxid" parameterType="java.lang.String" resultType="com.tly.model.Partner">
+		select * from partner where wxid = #{wxid}
+	</select>
+	<!-- 按管理员微信id查询合伙人id -->
+	<select id="selectawxidbypid" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select s.pid from shop as s 
+		left join administrator as a on s.sid = a.sid
+		where a.wxid = #{wxid} 
+	</select>
+	<!-- 查询提现完税明细表 -->
+	<select id="selectbytx" resultType="java.util.HashMap">
+		select me.time as time,me.wxid as wxid,mw.money as mwmoney,me.money as memoney,me.sl as sl,me.dkse as dkse,me.sjmoney as sjmoney,me.num as num from membertx as me left join memberwallet as mw on me.wxid = mw.wxid
+	</select>
+	<!-- 新增合伙人 -->
+	<insert id="insertbyp" parameterType="com.tly.model.Partner">
+		insert into partner(wxid,nickname,name,sex,date,phonenum,city,plid,mid) values(#{wxid},#{nickname},#{name},#{sex},#{date},#{phonenum},#{city},#{plid},#{mid})
+	</insert>
+	<select id="selectall" resultType="com.tly.model.Partner">
+		select * from partner
+	</select>
+</mapper>

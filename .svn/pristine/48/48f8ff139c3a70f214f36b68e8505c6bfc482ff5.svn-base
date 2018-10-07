@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<!-- 设备 -->
+		<typeAlias  alias="equipment" type="com.tly.model.Equipment"/>
+		<!-- 会员 -->
+		<typeAlias  alias="member" type="com.tly.model.Member"/>
+		<!-- 设备子表 -->
+		<typeAlias  alias="EquipmentSublist" type="com.tly.model.EquipmentSublist"/>
+		<!-- 设备出入库明细 -->
+		<typeAlias alias="equipmentinoutstorage" type="com.tly.model.EquipmentInoutstorage"/>
+		<!-- 用户使用明细 -->
+		<typeAlias alias="UserStatistics" type="com.tly.model.UserStatistics"/>
+		<!-- 店铺管理 -->
+		<typeAlias alias="shop" type="com.tly.model.Shop"/>
+		<!-- 积分明细 -->
+		<typeAlias alias="integral" type="com.tly.model.Integral"/>
+		<!-- 积分明细 -->
+		<typeAlias alias="partner" type="com.tly.model.Partner"/>
+		<!-- 合伙人设备 -->
+		<typeAlias alias="partnerequipment" type="com.tly.model.PartnerEquipment"/>
+		<!-- 店铺管理员 -->
+		<typeAlias alias="administrator" type="com.tly.model.Administrator"/>
+		<!-- 会员合伙人提成奖励对应 -->
+		<typeAlias alias="commissionreward" type="com.tly.model.Commissionreward"/>
+		<!-- 财务管理 -->
+		<typeAlias alias="finance" type="com.tly.model.Finance"/>
+		<!-- 故障设备维修明细 -->
+		<typeAlias alias="equipmentmaintenance" type="com.tly.model.EquipmentMaintenance"/>
+		<!-- 会员评价留言 -->
+		<typeAlias alias="evaluationmessage" type="com.tly.model.EvaluationMessage"/>
+		<!-- 会员合伙人上下级 -->
+		<typeAlias alias="memberonuplevel" type="com.tly.model.MemberonupLevel"/>
+		<!-- 维修工单和维修人员对应查看已读或未读 -->
+		<typeAlias alias="memcorresonding" type="com.tly.model.MemCorresonding"/>
+		<!-- 会员钱包 -->
+		<typeAlias alias="memberWallet" type="com.tly.model.MemberWallet"/>
+		<!-- 设备申请 -->
+		<typeAlias alias="equipmentapply" type="com.tly.model.EquipmentApply"/>
+		<!-- 公益金、基金账户支出明细 -->
+		<typeAlias alias="fund" type="com.tly.model.Fund"/>
+	</typeAliases>
+	<mappers>
+		<!-- 设备 -->
+		<mapper resource="com/tly/dao/EquipmentMapper.xml"/>
+		<!-- 设备 -->
+		<mapper resource="com/tly/dao/MemberMapper.xml"/>
+		<!-- 设备子表 -->
+		<mapper resource="com/tly/dao/EquipmentSublistMapper.xml"/>
+		<!-- 设备出入库明细 -->
+		<mapper resource="com/tly/dao/EquipmentInoutstorageMapper.xml"/>
+		<!-- 设备出入库明细 -->
+		<mapper resource="com/tly/dao/UserStatisticsMapper.xml"/>
+		<!-- 店铺管理 -->
+		<mapper resource="com/tly/dao/ShopMapper.xml"/>
+		<!-- 积分明细 -->
+		<mapper resource="com/tly/dao/IntegralMapper.xml"/>
+		<!-- 积分明细 -->
+		<mapper resource="com/tly/dao/PartnerMapper.xml"/>
+		<!-- 合伙人设备 -->
+		<mapper resource="com/tly/dao/PartnerEquipmentMapper.xml"/>
+		<!-- 店铺管理员 -->
+		<mapper resource="com/tly/dao/AdministratorMapper.xml"/>
+		<!-- 会员合伙人提成奖励对应 -->
+		<mapper resource="com/tly/dao/CommissionrewardMapper.xml"/>
+		<!-- 财务管理 -->
+		<mapper resource="com/tly/dao/FinanceMapper.xml"/>
+		<!-- 故障设备维修明细 -->
+		<mapper resource="com/tly/dao/EquipmentMaintenanceMapper.xml"/>
+		<!-- 会员评价留言 -->
+		<mapper resource="com/tly/dao/EvaluationMessageMapper.xml"/>
+		<!-- 会员合伙人上下级 -->
+		<mapper resource="com/tly/dao/MemberonupLevelMapper.xml"/>
+		<!-- 维修工单和维修人员对应查看已读或未读 -->
+		<mapper resource="com/tly/dao/MemCorresondingMapper.xml"/>
+		<!-- 会员钱包 -->
+		<mapper resource="com/tly/dao/MemberWalletMapper.xml"/>
+		<!-- 设备申请 -->
+		<mapper resource="com/tly/dao/EquipmentApplyMapper.xml"/>
+		<!-- 公益金、基金账户支出明细 -->
+		<mapper resource="com/tly/dao/FundMapper.xml"/>
+	</mappers>
+</configuration>

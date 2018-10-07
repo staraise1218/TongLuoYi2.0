@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 会员使用统计 -->
+<mapper namespace="com.tly.dao.IUserStatisticsDao">
+
+	<!-- 根据用户id查询使用次数 -->
+	<select id="selectUseSumByMid" parameterType="int" resultType="java.lang.Integer">
+		select count(mid) from UserStatistics where mid = #{mid}
+	</select>
+	<!-- 查询会员使用 -->
+	<select id="selectByUs" parameterType="java.lang.Integer" resultType="java.util.HashMap">
+		select * from userstatistics as us 
+			left join equipmentsublist as es on us.eid = es.id
+			where us.mid = #{mid}
+	</select>
+	
+	<!-- 录入一个对象 -->
+	<insert id="insert" parameterType="com.tly.model.UserStatistics">
+		insert into UserStatistics(mid,eid,starttime,utilitytime,endtime,money) values(#{mid},#{eid},#{starttime},#{utilitytime},#{endtime},#{money})
+	</insert>
+	
+	<!-- 根据用户微信id查询该用户最近一次的使用记录 -->
+	<select id="selectUsidByWxidAndFirstTime" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select * from userstatistics where mid = (select id from member where wxid = #{wxid}) order by starttime DESC LIMIT 1
+	</select>
+	
+	<!-- 查询该用户的使用总次数和总时长 -->
+	<select id="selectSumuserstatistics" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select count(id) as count,sum(utilitytime) as sumUseTime from userstatistics where mid = (select id from member where wxid = #{wxid})
+	</select>
+	
+	<!-- 查找这个会员最近一条消费记录-->
+	<select id="selectLast" parameterType="java.lang.String" resultType="com.tly.model.UserStatistics">
+		select * from userstatistics where mid = (select id from member where wxid = #{wxid}) order by starttime DESC LIMIT 1
+	</select>
+	
+	<!-- 修改结束时间和使用时间 -->
+	<update id="updateTime" parameterType="com.tly.model.UserStatistics">
+		update userstatistics set utilitytime = #{utilitytime},endtime=#{endtime} where id = #{id}
+	</update>
+	
+	<!-- 查询该用户近30天的使用记录 -->
+	<select id="selectUserstatisticsListByWxid" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select us.starttime as starttime,us.utilitytime/60000 as u,e.name as name
+		from userstatistics as us
+		left join equipmentsublist es on us.eid = es.id
+		left join equipment as e on es.eid = e.id
+		where DATE_SUB(CURDATE(), INTERVAL 30 DAY) <![CDATA[ <= ]]> date(us.starttime) and us.mid = (select id from member where wxid = #{wxid})
+	</select>
+	
+	<!-- 按管理员微信id查询该店铺没有开机的设备 -->
+	<select id="selectNotStartingByWxid" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select * 
+		from userstatistics as us 
+		left join equipmentsublist as es on us.eid = es.id
+		left join member as m on m.id = us.mid
+		where us.endtime is null and us.eid in
+		(select pe.eid
+		from partnerequipment as pe
+		left join shop as s on pe.pid = s.pid
+		left join administrator as a  on a.sid = s.sid 
+		where a.wxid = #{wxid}
+		)and DATE_SUB(CURDATE(), INTERVAL 6 DAY) <![CDATA[ <= ]]> date(us.starttime)
+	</select>
+	<!-- 按管理员微信id查询该店铺没有开机的设备的未读数量 -->
+	<select id="selectNotStartingByWxidcount" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) 
+		from userstatistics as us 
+		left join equipmentsublist as es on us.eid = es.id
+		left join member as m on m.id = us.mid
+		where us.endtime is null and us.eid in
+		(select pe.eid
+		from partnerequipment as pe
+		left join shop as s on pe.pid = s.pid
+		left join administrator as a  on a.sid = s.sid 
+		where a.wxid = #{wxid}
+		)and us.look = 2
+	</select>
+	<!-- 按管理员微信id查询店铺没有开机的设备修改为已读 -->
+	<update id="updateNotStartingByLook" parameterType="java.lang.String">
+		update userstatistics set look = 1 where id in(
+		select u.id from (
+		select us.id
+		from userstatistics as us 
+		left join equipmentsublist as es on us.eid = es.id
+		left join member as m on m.id = us.mid
+		where us.endtime is null and us.eid in
+		(select pe.eid
+		from partnerequipment as pe
+		left join shop as s on pe.pid = s.pid
+		left join administrator as a  on a.sid = s.sid 
+		where a.wxid = #{wxid})
+		) as u
+		)
+	</update>
+	<!-- 按合伙人微信id查询该店铺没有开机的设备 -->
+	<select id="selectNotStartingByPwxid" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select * 
+		from userstatistics as us 
+		left join equipmentsublist as es on us.eid = es.id
+		left join member as m on m.id = us.mid
+		where us.endtime is null and us.eid in
+		(select pe.eid
+		from partnerequipment as pe
+		left join shop as s on pe.pid = s.pid
+		left join partner as p  on p.id = s.pid 
+		where p.wxid = #{wxid}
+		)and DATE_SUB(CURDATE(), INTERVAL 6 DAY) <![CDATA[ <= ]]> date(us.starttime)
+	</select>
+	<!-- 按合伙人微信id查询该店铺没有开机的设备的未读数量 -->
+	<select id="selectNotStartingBypwxidcount" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) 
+		from userstatistics as us 
+		left join equipmentsublist as es on us.eid = es.id
+		left join member as m on m.id = us.mid
+		where us.endtime is null and us.eid in
+		(select pe.eid
+		from partnerequipment as pe
+		left join shop as s on pe.pid = s.pid
+		left join partner as p  on p.id = s.pid 
+		where p.wxid = #{wxid}
+		)and us.plook = 2
+	</select>
+	<!-- 按管理员微信id查询店铺没有开机的设备修改为已读 -->
+	<update id="updateNotStartingByPlook" parameterType="java.lang.String">
+		update userstatistics set plook = 1 where id in(
+		select u.id from (
+		select us.id
+		from userstatistics as us 
+		left join equipmentsublist as es on us.eid = es.id
+		left join member as m on m.id = us.mid
+		where us.endtime is null and us.eid in
+		(select pe.eid
+		from partnerequipment as pe
+		left join shop as s on pe.pid = s.pid
+		left join partner as p  on p.id = s.pid 
+		where p.wxid = #{wxid})
+		) as u
+		)
+	</update>
+	<!-- 查询当前用户的最后一条记录 -->
+	<select id="selectByLast" parameterType="java.lang.String" resultType="com.tly.model.UserStatistics">
+		select * from userstatistics as us where mid = (select mid from member where wxid = #{wxid}) order by id desc limit 1
+	</select>
+</mapper>

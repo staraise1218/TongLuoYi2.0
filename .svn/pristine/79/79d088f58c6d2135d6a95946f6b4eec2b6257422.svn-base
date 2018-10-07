@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 设备申请 -->
+<mapper namespace="com.tly.dao.IEquipmentApplyDao">
+	<insert id="insertOneApple" parameterType="com.tly.model.EquipmentApply">
+		insert into equipmentapply (eatype,wxid,eaname,eatel,eaaddress,eausetype) values (#{eatype},#{wxid},#{eaname},#{eatel},#{eaaddress},#{eausetype})
+	</insert>		
+</mapper>

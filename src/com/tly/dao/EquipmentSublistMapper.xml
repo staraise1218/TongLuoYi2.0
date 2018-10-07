@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 设备子表 -->
+<mapper namespace="com.tly.dao.IEquipmentSublistDao">
+	
+	<!-- 根据设备码查询设备状态 -->
+	<select id="selectStateByEquipmentnumber" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select status from partnerequipment where eid = (select id from equipmentsublist where number = #{_parameter})
+	</select>
+	
+	<!-- 新增产品 -->
+	<insert id="insertes" parameterType="com.tly.model.EquipmentSublist">
+		insert into equipmentsublist(eid,number,ewm,platformprice,servicetime,img) values(#{eid},#{number},#{ewm},#{platformprice},#{servicetime},#{img})
+	</insert>
+	
+	<!-- 按条件查询 -->
+	<select id="selectByCondition" parameterType="java.util.HashMap" resultType="com.tly.model.EquipmentSublist">
+		select * from equipmentsublist where number = #{number}
+	</select>
+	
+	<!-- 根据设备的编号查询该设备需要付款多少钱 -->
+	<select id="selectMoneyByEquipmentnumber" parameterType="string" resultType="java.lang.Double">
+		select smoney from PartnerEquipment where eid = (select id from EquipmentSublist where number = #{equipmentnumber})
+	</select>
+	
+	<!-- 查询产品管理 -->
+	<select id="selectByProduct" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select es.id as id,e.type as type,es.number as number,ei.status as status,p.name as name,p.phonenum as phonenum,pe.form as form,pe.status as pestatus,es.ewm
+			from equipmentsublist as es 
+			left join equipment e on es.eid = e.id 
+			left join partnerequipment as pe on es.id = pe.eid 
+			left join partner as p on pe.pid = p.id 
+			left join equipmentinoutstorage as ei on es.number = ei.number
+			<where>
+				<if test="number != null and number != ''">
+					and es.number = #{number}
+				</if>
+			</where>
+	</select>
+	
+	<!-- 修改产品 -->
+	<update id="updatepro" parameterType="com.tly.model.EquipmentSublist">
+		update equipmentsublist set num=#{num},introduce=#{introduce} where id=#{id}
+	</update>
+	
+	<!-- 批量删除产品 -->
+	<delete id="deletepro">
+        delete from equipmentsublist where id in 
+        <foreach collection="array" item="arr" open="(" separator="," close=")">
+            #{arr}
+        </foreach>
+	</delete>
+	
+	<select id="selectZiIdByEquipmentnumber" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select id from equipmentsublist where number = #{equipmentnumber}
+	</select>
+	<!-- 查询没有合伙人的产品 -->
+	<select id="selectbynotp" resultType="com.tly.model.EquipmentSublist">
+		select es.* from equipmentsublist es 
+		left join partnerequipment pe on es.id = pe.eid 
+		left join partner p on pe.pid = p.id where pe.eid is null
+	</select>
+</mapper>

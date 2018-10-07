@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 会员 -->
+<mapper namespace="com.tly.dao.IMemberDao">
+	<!-- 根据电话查询该用户的id -->
+	<select id="selectOneByPhone" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select id from member where phonenum = #{phonenum}
+	</select>
+	<!-- 会员管理 -->
+	<select id="selectByMember" resultType="java.util.HashMap">
+		select m.id as mid,m.wxid as wxid,m.nickname as nickname,m.name as name,m.sex as sex,m.date as date,m.phonenum as phonenum,m.city as city,mw.money as money,
+		(select ifnull(sum(consumption),0)+ifnull(sum(starrating),0)+ifnull(sum(leaveword),0) from integral where  wxid = m.wxid)as sum,
+		(select count(*) from userstatistics where m.id = mid) as num
+			from member as m 
+			left join memberwallet as mw on m.wxid = mw.wxid
+			left join integral as i on m.wxid = i.wxid
+			left join userstatistics as us on m.id = us.mid
+			group by m.wxid
+	</select>
+	<!-- 查询一级上线 -->
+	<select id="selectonone" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid =(select onwxid from memberonuplevel where wxid=#{wxid})
+	</select>
+	<!-- 查询二级上线 -->
+	<select id="selectontwo" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid = ( select onwxid from memberonuplevel where wxid =( select onwxid from memberonuplevel where wxid=#{wxid}))
+	</select>
+	<!-- 查询一级下线 -->
+	<select id="selectupone" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid in ( select wxid from memberonuplevel where onwxid=#{wxid})
+	</select>
+	<!-- 查询二级下线 -->
+	<select id="selectuptwo" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid in ( select wxid from memberonuplevel where onwxid in(select wxid from memberonuplevel where onwxid=#{wxid}))
+	</select>
+	<!-- 查询一级下线的总人数 -->
+	<select id="selectByCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) from member where wxid in ( select wxid from memberonuplevel where onwxid=#{wxid})
+	</select>
+	<!-- 根据用户的微信id查询整个用户对象 -->
+	<select id="selectOneMemberByWxid" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid = #{wxid}
+	</select>
+	<!-- 按设备编号关联查询合伙人的一级上线 -->
+	<select id="selectponone" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid =
+		(select onwxid from memberonuplevel where wxid=
+		(select p.wxid 
+			from equipmentsublist as es 
+			left join partnerequipment as pe on pe.eid = es.id
+			left join partner as p on p.id = pe.pid
+			where es.number = #{number}))
+	</select>
+	<!-- 按设备编号关联查询合伙人二级上线 -->
+	<select id="selectpontwo" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid = 
+		(select onwxid from memberonuplevel where wxid =
+		(select onwxid from memberonuplevel where wxid=
+		(select p.wxid 
+			from equipmentsublist as es 
+			left join partnerequipment as pe on pe.eid = es.id
+			left join partner as p on p.id = pe.pid
+			where es.number = #{number})))
+	</select>
+	
+	<!-- 根据用户微信id查询该用户id -->
+	<select id="selectMidByWxid" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select id from member where wxid = #{wxid}
+	</select>
+	
+	<!-- 录入一个会员对象 -->
+	<insert id="insertOneMember" parameterType="com.tly.model.Member">
+		insert into member (wxid,nickname,sex,phonenum,city,mlid,type,img,jrtime) values (#{wxid},#{nickname},#{sex},#{phonenum},#{city},#{mlid},1,#{img},sysdate())
+	</insert>
+	
+	<!-- 修改一个会员任意的一个属性 -->
+	<update id="updateOneMember" parameterType="com.tly.model.Member">
+		update member set 
+		<if test="wxid != null and wxid != ''">wxid = #{wxid},</if>
+		<if test="nickname != null and nickname != ''">nickname = #{nickname},</if>
+		<if test="name != null and name != ''">name = #{name},</if>
+		<if test="sex != null and sex != ''">sex = #{sex},</if>
+		<if test="date != null and date != ''">date = #{date}</if>
+		<if test="phonenum != null and phonenum != ''">phonenum = #{phonenum},</if>
+		<if test="city != null and city != ''">city = #{city},</if>
+		<if test="mlid != null and mlid != ''">mlid = #{mlid},</if>
+		<if test="type != null and type != ''">type = #{type},</if>
+		<if test="img != null and img != ''">img = #{img},</if>
+		<if test="mewm != null and mewm != ''">mewm = #{mewm},</if>
+		<if test="jrtime != null and jrtime != ''">jrtime = #{jrtime},</if>
+        id = #{id}
+        where id = #{id}
+	</update>
+	<!-- 查询不是本月加入的会员 -->
+	<select id="selectByNotMonth" parameterType="java.util.HashMap" resultType="com.tly.model.Member">
+		select * from member as m where year(jrtime) != #{year} or month(jrtime) != #{month}
+	</select>
+	<!-- 修改级别 -->
+	<update id="updateByLevel" parameterType="com.tly.model.Member">
+		update member set mlid=#{mlid} where wxid=#{wxid}
+	</update>
+	<!-- 查询该会员的本月消费金额 -->
+	<select id="selectbymoney" parameterType="java.util.HashMap" resultType="java.lang.Double">
+		select ((select coalesce(sum(xfonemoney),0) from finance where xfonewxid = #{wxid} and year(time)=#{year} and month(time) = #{month})+
+		(select coalesce(sum(xftwomoney),0) from finance where xftwowxid = #{wxid} and year(time)=#{year} and month(time) = #{month})
+		)
+	</select>
+	<!-- 查询合伙人的本月在租押金加累计购买 -->
+	<select id="selectbyzjandgm" parameterType="java.util.HashMap" resultType="java.lang.Double">
+		select (
+		(select coalesce(sum(zyonemoney),0) from finance where zyonewxid = #{wxid} and year(time)=#{year} and month(time) = #{month})+
+		(select coalesce(sum(zytwomoney),0) from finance where zytwowxid = #{wxid} and year(time)=#{year} and month(time) = #{month})+
+		(select coalesce(sum(gmonemoney),0) from finance where gmonewxid = #{wxid} and year(time)=#{year} and month(time) = #{month})+
+		(select coalesce(sum(gmtwomoney),0) from finance where gmtwowxid = #{wxid} and year(time)=#{year} and month(time) = #{month})
+		)
+	</select>
+	<!-- 查询不是本月加入的合伙人 -->
+	<select id="selectByNotMonthbyp" parameterType="java.util.HashMap" resultType="com.tly.model.Partner">
+		select * from partner where year(time) != #{year} or month(time) != #{month}
+	</select>
+	<!-- 修改合伙人级别 -->
+	<update id="updatebyplevel" parameterType="com.tly.model.Partner">
+		update partner set plid = #{plid} where wxid = #{wxid}
+	</update>
+	<!-- 按手机号或微信号查找店铺管理员 -->
+	<select id="selectByPhonenumOrWxid" parameterType="java.lang.String" resultType="com.tly.model.Member">
+		select * from member where wxid = #{wp} or phonenum = #{wp} 
+	</select>
+	<!-- 修改角色 -->
+	<update id="updatetype" parameterType="java.util.HashMap">
+		update member set type = #{type} where wxid = #{wp} or phonenum = #{wp} 
+	</update>
+	<!-- 查找全部会员 -->
+	<select id="selectByMembers" resultType="com.tly.model.Member">
+		select * from member
+	</select>
+	<!-- 查询还不是合伙人的会员 -->
+	<select id="selectByNotp" resultType="com.tly.model.Member">
+		select m.* from member m left join partner p on m.id = p.mid where p.mid is null
+	</select>
+</mapper>

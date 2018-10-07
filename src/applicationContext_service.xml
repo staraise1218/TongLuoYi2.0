@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+     xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+	 http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+	
+	<import resource="applicationContext_dao.xml"/>
+	
+	<!-- 设备 -->
+	<bean id="ies" class="com.tly.service.impl.EquipmentService">
+		<property name="iedao" ref="iedao"></property>
+		<property name="iesdao" ref="iesdao"></property>
+		<property name="ieadao" ref="ieadao"></property>
+	</bean>
+	<!-- 会员service -->
+	<bean id="ims" class="com.tly.service.impl.MemberService">
+		<property name="imdao" ref="imdao"></property>
+		<property name="iusdao" ref="iusdao"></property>
+		<property name="imldao" ref="imldao"></property>
+		<property name="imwdao" ref="imwdao"></property>
+	</bean>
+	<!-- 设备子表 -->
+	<bean id="iess" class="com.tly.service.impl.EquipmentSublistService">
+		<property name="iesdao" ref="iesdao"></property>
+	</bean>
+	<!-- 设备出入库明细 -->
+	<bean id="ieis" class="com.tly.service.impl.EquipmentInoutstorageService">
+		<property name="ieidao" ref="ieidao"></property>
+	</bean>
+	<!-- 店铺管理-->
+	<bean id="iss" class="com.tly.service.impl.ShopService">
+		<property name="isdao" ref="isdao"></property>
+	</bean>
+	<!-- 积分明细 -->
+	<bean id="iis" class="com.tly.service.impl.IntegralService">
+		<property name="iidao" ref="iidao"></property>
+		<property name="iesdao" ref="iesdao"></property>
+		<property name="iusdao" ref="iusdao"></property>
+	</bean>
+	<!-- 会员使用统计 -->
+	<bean id="iuss" class="com.tly.service.impl.UserStatisticsService">
+		<property name="iusdao" ref="iusdao"></property>
+		<property name="imdao" ref="imdao"></property>
+		<property name="iesdao" ref="iesdao"></property>
+		<property name="ipedao" ref="ipedao"></property>
+	</bean>
+	<!-- 合伙人 -->
+	<bean id="ips" class="com.tly.service.impl.PartnerService">
+		<property name="ipdao" ref="ipdao"></property>
+		<property name="ipedao" ref="ipedao"></property>
+		<property name="icdao" ref="icdao"></property>
+	</bean>
+	<!-- 合伙人设备 -->
+	<bean id="ipes" class="com.tly.service.impl.PartnerEquipmentService">
+		<property name="ipedao" ref="ipedao"></property>
+	</bean>
+	<!-- 店铺管理员 -->
+	<bean id="ias" class="com.tly.service.impl.AdministratorService">
+		<property name="iadao" ref="iadao"></property>
+	</bean>
+	<!-- 会员合伙人提成奖励对应 -->
+	<bean id="ics" class="com.tly.service.impl.CommissionrewardService">
+		<property name="icdao" ref="icdao"></property>
+	</bean>
+	<!-- 财务管理 -->
+	<bean id="ifs" class="com.tly.service.impl.FinanceService">
+		<property name="ifdao" ref="ifdao"></property>
+	</bean>
+	<!-- 故障设备维修明细 -->
+	<bean id="iems" class="com.tly.service.impl.EquipmentMaintenanceService">
+		<property name="iemdao" ref="iemdao"></property>
+	</bean>
+	<!-- 会员评价留言 -->
+	<bean id="ievms" class="com.tly.service.impl.EvaluationMessageService">
+		<property name="ievmdao" ref="ievmdao"></property>
+	</bean>
+	<!-- 维修工单和维修人员对应查看已读或未读 -->
+	<bean id="imcs" class="com.tly.service.impl.MemCorresondingService">
+		<property name="imcdao" ref="imcdao"></property>
+	</bean>
+	<!-- 公益金、基金账户支出明细 -->
+	<bean id="ifus" class="com.tly.service.impl.FundService">
+		<property name="ifudao" ref="ifudao"></property>
+	</bean>
+
+</beans>

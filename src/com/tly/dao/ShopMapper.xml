@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 店铺管理 -->
+<mapper namespace="com.tly.dao.IShopDao">
+	<!-- 查询店铺 -->
+	<select id="selectByShop" resultType="com.tly.model.Shop">
+		select * from shop
+	</select>
+	<!-- 按合伙人查找店铺 -->
+	<select id="selectpwxidbyshop" parameterType="java.lang.String" resultType="com.tly.model.Shop">
+		select s.* from partner as p left join shop as s on p.id = s.pid where p.wxid = #{wxid}
+	</select>
+	<!-- 查询在附近的100个商家 按照距离远近排序 -->
+	<select id="selectNearby" parameterType="java.util.Map" resultType="java.util.Map">
+	    SELECT * ,
+    	ROUND(
+    		6378.138 * 2 * ASIN(
+    			SQRT(
+    				POW(
+    					SIN(
+    						(
+    							#{weidu} * PI() / 180 - SUBSTRING_INDEX(location,',',-1) * PI() / 180
+    						) / 2
+    					),
+    					2
+    				) + COS(#{weidu} * PI() / 180) * COS(SUBSTRING_INDEX(location,',',-1) * PI() / 180) * POW(
+    					SIN(
+    						(
+    							#{jingdu} * PI() / 180 - left(location,13) * PI() / 180
+    						) / 2
+    					),
+    					2
+    				)
+    			)
+    		) * 1000
+    	)/1000 AS juli FROM shop ORDER BY juli DESC limit ${first}, ${last}
+	</select>
+	 
+	<select id="selectOneBySid" parameterType="int" resultType="com.tly.model.Shop">
+		select * from shop where sid =#{sid}
+	</select>
+</mapper>

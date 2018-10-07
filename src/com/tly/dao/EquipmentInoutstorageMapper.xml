@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 出入库明细 -->
+<mapper namespace="com.tly.dao.IEquipmentInoutstorageDao">
+	<!-- 新增出入库明细 -->
+	<insert id="insertei" parameterType="com.tly.model.EquipmentInoutstorage">
+		insert into equipmentinoutstorage(number,status,entrytime,source) values(#{number},#{status},now(),#{source})
+	</insert>
+	<!-- 条件查询 -->
+	<select id="selectByEi" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select es.number as number,ei.entrytime as entrytime,ei.source as source,ei.outtime as outtime,p.name as name,p.phonenum as phonenum,pe.form as form,es.platformprice as platformprice 
+			from equipmentsublist as es 
+			left join equipmentinoutstorage as ei on es.number = ei.number 
+			left join partnerequipment as pe on es.id = pe.eid 
+			left join partner as p on pe.pid = p.id
+			<where>
+				<!-- 按设备编号查询 -->
+				<if test="number != null and number != ''">
+					and es.number = #{number}
+				</if>
+			</where>
+	</select>
+</mapper>

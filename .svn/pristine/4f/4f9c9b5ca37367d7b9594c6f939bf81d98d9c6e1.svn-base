@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 会员评价留言 -->
+<mapper namespace="com.tly.dao.IEvaluationMessageDao">
+	<!-- 新增评价留言 -->
+	<insert id="insertem" parameterType="com.tly.model.EvaluationMessage">
+		insert into evaluationmessage(usid) values(#{usid})
+	</insert>
+	<!-- 新增评价留言 -->
+	<update id="updateem" parameterType="com.tly.model.EvaluationMessage">
+		update evaluationmessage set service=#{service},effect=#{effect} where emid=#{emid}
+	</update>
+	<!-- 留言 -->
+	<update id="updateByleavemessage" parameterType="com.tly.model.EvaluationMessage">
+		update evaluationmessage set part=#{part},leavemessage=#{leavemessage} where emid=#{emid}
+	</update>
+	<!-- 按id查询 -->
+	<select id="selectByOneNotnull" parameterType="java.lang.Integer" resultType="com.tly.model.EvaluationMessage">
+		select * from evaluationmessage where effect <![CDATA[<> ]]> '' and emid = #{emid}
+	</select>
+	<!-- 按id查询该数据是否是30天内的 -->
+	<select id="selectBytime" parameterType="java.lang.Integer" resultType="com.tly.model.EvaluationMessage">
+		select * from evaluationmessage where DATE_SUB(CURDATE(), INTERVAL 30 DAY) <![CDATA[<= ]]> date(time) and emid = #{emid}
+	</select>
+	<!-- 追加留言 -->
+	<update id="updateByadditionalcomments" parameterType="com.tly.model.EvaluationMessage">
+		update evaluationmessage set additionalcomments=#{additionalcomments} where emid=#{emid}
+	</update>
+	<!-- 判断是否留过言 -->
+	<select id="selectByac" parameterType="java.lang.Integer" resultType="com.tly.model.EvaluationMessage">
+		select * from evaluationmessage where emid = #{emid} and leavemessage <![CDATA[<> ]]> ''
+	</select>
+	<!-- 查询所有人的留言 -->
+	<select id="selectByLeavmessage" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select em.emid,e.name as name,em.service as service,em.effect as effect,em.leavemessage as leavemessage,m.nickname as nickname,m.img as img,ut.endtime as endtime
+			from evaluationmessage as em 
+			left join userstatistics as ut on em.usid = ut.id
+			left join integral as i on i.usid = ut.id
+			left join equipmentsublist as es on i.eid = es.id
+			left join equipment as e on es.eid = e.id
+			left join member as m on ut.mid = m.id
+			where (em.look = 1 or TIMESTAMPDIFF(hour,em.time,sysdate())>24) and (em.service is not null or em.effect is not null) limit #{pageNum},#{pageSize}
+	</select>
+	<!-- 查询某人的留言 -->
+	<select id="selectByWxid" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		select em.emid as emid,e.name as name,em.service as service,em.effect as effect,em.leavemessage as leavemessage,ut.endtime as endtime,ut.utilitytime as utilitytime,em.additionalcomments,em.part
+			from evaluationmessage as em 
+			left join userstatistics as ut on em.usid = ut.id
+			left join integral as i on i.usid = ut.id
+			left join equipmentsublist as es on i.eid = es.id
+			left join equipment as e on es.eid = e.id
+			where  i.wxid = #{wxid} limit #{pageNum},#{pageSize}
+	</select>
+</mapper>

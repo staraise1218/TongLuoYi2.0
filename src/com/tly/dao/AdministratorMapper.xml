@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 店铺管理员 -->
+<mapper namespace="com.tly.dao.IAdministratorDao">
+	<!-- 查询店铺管理员 -->
+	<select id="selectByA" parameterType="java.lang.Integer" resultType="com.tly.model.Administrator">
+		select a.* from shop as s 
+			left join partner as p on s.pid = p.id
+			left join administrator as a on s.sid = a.sid
+			where s.pid = #{pid}
+	</select>
+	<!-- 添加管理员 -->
+	<insert id="inserta" parameterType="com.tly.model.Administrator">
+		insert into administrator(wxid,name,phonenum,sid) values(#{wxid},#{name},#{phonenum},#{sid})
+	</insert>
+	<!-- 修改角色 -->
+	<update id="updatetype" parameterType="com.tly.model.Administrator">
+		update administrator set type = #{type} where id = #{id}
+	</update>
+	<!-- 删除管理员 -->
+	<delete id="deletea" parameterType="java.lang.Integer">
+		delete from administrator where id = #{id}
+	</delete>
+	<!-- 按合伙人微信id查询店铺管理员 -->
+	<select id="selectpwxidbya" parameterType="java.lang.String" resultType="com.tly.model.Administrator">
+		select a.* from shop as s 
+			left join partner as p on s.pid = p.id
+			left join administrator as a on s.sid = a.sid
+			where  p.wxid = #{wxid}
+	</select>
+	<!-- 按微信id查询 -->
+	<select id="selectonebywxid" parameterType="java.lang.Integer" resultType="com.tly.model.Administrator">
+		select * from administrator where id = #{id}
+	</select>
+</mapper>

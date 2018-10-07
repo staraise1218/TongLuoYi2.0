@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 设备 -->
+<mapper namespace="com.tly.dao.IEquipmentDao">
+	<!-- 新增 -->
+	<insert id="insert" parameterType="com.tly.model.Equipment">
+		insert into equipment(name,type,cashpledge,price,eimg) values(#{name},#{type},#{cashpledge},#{price},#{eimg})
+	</insert>
+	<!-- 查询对象 -->
+	<select id="selectByCondition" parameterType="java.util.HashMap" resultType="com.tly.model.Equipment">
+		select * from equipment
+		<where>
+			<!-- 按设备型号查询 -->
+			<if test="type != null and type != ''">
+				and type = #{type}
+			</if>
+			<!-- 按设备名称查询 -->
+			<if test="name != null and name != ''">
+				and name = #{name}
+			</if>
+			<!-- 查询除了他本身的设备 -->
+			<if test="types != null and types != ''">
+				and type = #{typep} and type <![CDATA[ <> ]]> #{types}
+			</if>
+		</where>
+	</select>
+	<!-- 查询设备名称 -->
+	<select id="selectEByName" resultType="java.lang.String">
+		select distinct name from equipment
+	</select>
+	<!-- 查询库存设备 -->
+	<select id="selectByEquipment" resultType="java.util.HashMap">
+		select e.*,count(es.eid) as count from equipment e left join equipmentsublist as es on e.id = es.eid group by e.type
+	</select>
+	<!-- 按id查询 -->
+	<select id="selectOne" parameterType="java.lang.Integer" resultType="com.tly.model.Equipment">
+		select * from equipment where id=#{id}
+	</select>
+	<!-- 修改设备 -->
+	<update id="update" parameterType="com.tly.model.Equipment">
+		update equipment set name=#{name},type=#{type},cashpledge=#{cashpledge},price=#{price} where id=#{id}
+	</update>
+	<!-- 按设备编号查询 -->
+	<select id="selectByNumber" parameterType="com.tly.model.Equipment">
+		select p.* 
+		from equipmentsublist as es 
+		left join equipment as e on es.eid = e.id 
+		where es.number = '7PVVM'
+	</select>
+	
+	<select id="selectList" resultType="com.tly.model.Equipment" parameterType="java.lang.String">
+		select * from  equipment e where type like '%' #{type} group by e.name
+	</select>
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 会员合伙人提成奖励对应表 -->
+<mapper namespace="com.tly.dao.ICommissionrewardDao">
+	<!-- 查询奖励对应 -->
+	<select id="selectByC" resultType="com.tly.model.Commissionreward">
+		select * from commissionreward
+	</select>
+	
+	<!-- 根据他是第几级上线和他的mid查询他应该提多少钱 -->
+	<select id="selectMoneyByRank" parameterType="java.util.HashMap" resultType="commissionreward">
+		select * from commissionreward where level = (select plid from partner where mid = ${_parameter}) and 
+		identity = (select type from member where id = ${_parameter})
+	</select>
+	
+	<!-- 按级别和身份查询 -->
+	<select id="selectByLevelAndIdentity" parameterType="java.util.HashMap" resultType="com.tly.model.Commissionreward">
+		select * from commissionreward where level = #{level} and identity = #{identity}
+	</select>
+</mapper>

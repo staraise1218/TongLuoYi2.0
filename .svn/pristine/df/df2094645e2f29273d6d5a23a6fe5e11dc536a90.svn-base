@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 积分明细 -->
+<mapper namespace="com.tly.dao.IIntegralDao">
+	<!-- 查询积分 -->
+	<select id="selectByIntegral" parameterType="java.util.HashMap" resultType="com.tly.model.Integral">
+		select * from integral
+		<where>
+			<if test="wxid != null and wxid != ''">
+				and wxid = #{wxid}
+			</if>
+			<if test="year != null and year != ''">
+				and year(time) = #{year}
+			</if>
+			<if test="month != null and month != ''">
+				and month(time) = #{month}
+			</if>
+		</where>
+	</select>
+	<!-- 查询积分 -->
+	<select id="selectByContent" parameterType="java.util.HashMap" resultType="com.tly"></select>
+	<!-- 查询7天内的积分 -->
+	<select id="selectByTime" parameterType="java.lang.String" resultType="com.tly.model.Integral">
+		select * from integral where wxid=#{wxid} and DATE_SUB(CURDATE(), INTERVAL 6 DAY) <![CDATA[ <= ]]> date(time)
+	</select>
+	<!-- 增加积分 -->
+	<insert id="insertIg" parameterType="com.tly.model.Integral">
+		insert into integral(wxid,consumption,eid,time,usid) values(#{wxid},#{consumption},#{eid},#{time},#{usid})
+	</insert>
+	<!-- 修改星评 -->
+	<update id="updatestarrating" parameterType="com.tly.model.Integral">
+		update integral set starrating=#{starrating} where usid=#{usid}
+	</update>
+	<!-- 修改留言 -->
+	<update id="updateleaveword" parameterType="com.tly.model.Integral">
+		update integral set leaveword=#{leaveword} where usid=#{usid}
+	</update>
+	<!-- 插入一条数据 -->
+	<insert id="insertIntegral" parameterType="com.tly.model.Integral">
+		insert into integral(wxid,consumption,starrating,leaveword,eid,time,usid) values(#{wxid},#{consumption},#{starrating},#{leaveword},#{eid},#{time},#{usid})
+	</insert>
+	<!-- 查询没有读的数量 -->
+	<select id="selectByNotLook" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) from integral where wxid = #{wxid} and look = 2
+	</select>
+	<!-- 修改成已读 -->
+	<update id="updateBylook" parameterType="java.lang.String">
+		update integral set look = 1 where wxid = #{wxid}
+	</update>
+	<!-- 根据用户微信id查询该用户总积分 -->
+	<select id="selectSumIntegralByWxid" parameterType="java.lang.String" resultType="java.lang.Long">
+		SELECT sum(starrating)+sum(consumption)+sum(leaveword) from integral where wxid = #{wxid}
+	</select>
+</mapper>

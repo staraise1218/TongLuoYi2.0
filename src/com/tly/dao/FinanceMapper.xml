@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 积分明细 -->
+<mapper namespace="com.tly.dao.IFinanceDao">
+
+	<!-- 查询钱包明细 -->
+	<select id="selectByFinance" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select (select mlid from member where wxid = #{wxid}) as level,
+		(select plid from partner where wxid=#{wxid}) as identity,
+		(select ifnull((select sum(xfonemoney) from finance where wxid = #{wxid}),0)+
+		ifnull((select sum(xftwomoney) from finance where wxid = #{wxid}),0)+
+		ifnull((select sum(zyonemoney) from finance where wxid = #{wxid}),0)+
+		ifnull((select sum(zytwomoney) from finance where wxid = #{wxid}),0)+
+		ifnull((select sum(gmonemoney) from finance where wxid = #{wxid}),0)+
+		ifnull((select sum(gmtwomoney) from finance where wxid = #{wxid}),0)
+		) as sr,
+		(select ifnull((select sum(xfonemoney) from finance where wxid = #{wxid}),0)) as xfone,
+		(select ifnull((select sum(xftwomoney) from finance where wxid = #{wxid}),0)) as xftwo,
+		(select ifnull((select sum(zyonemoney) from finance where wxid = #{wxid}),0)) as zyone,
+		(select ifnull((select sum(zytwomoney) from finance where wxid = #{wxid}),0)) as zytwo,
+		(select ifnull((select sum(gmonemoney) from finance where wxid = #{wxid}),0)) as gmone,
+		(select ifnull((select sum(gmtwomoney) from finance where wxid = #{wxid}),0)) as gmtwo,
+		(select(ifnull((select withdrawdeposit from memberwallet where wxid = #{wxid}),0))) as tx,
+		(select(ifnull((select money from memberwallet where wxid = #{wxid}),0)))as ye
+	</select>
+	
+	<!-- 查询下线明细 -->
+	<select id="selectByUp" parameterType="java.util.HashMap" resultType="com.tly.model.Finance">
+		select * from finance where wxid = #{wxid}
+		<if test="xfonewxid != null and xfonewxid != ''">
+			and xfonewxid <![CDATA[ <> ]]> ''
+		</if>
+		<if test="xftwowxid != null and xftwowxid != ''">
+			and xftwowxid <![CDATA[ <> ]]> ''
+		</if>
+		<if test="zyonewxid != null and zyonewxid != ''">
+			and zyonewxid <![CDATA[ <> ]]> ''
+		</if>
+		<if test="zytwowxid != null and zytwowxid != ''">
+			and zytwowxid <![CDATA[ <> ]]> ''
+		</if>
+		<if test="gmonewxid != null and gmonewxid != ''">
+			and gmonewxid <![CDATA[ <> ]]> ''
+		</if>
+		<if test="gmtwowxid != null and gmtwowxid != ''">
+			and gmtwowxid <![CDATA[ <> ]]> ''
+		</if>
+		 and DATE_SUB(CURDATE(), INTERVAL 30 DAY) <![CDATA[<= ]]> date(time)
+	</select>
+	<!-- 查询平台收入日报 -->
+	<select id="selectrb" resultType="java.util.HashMap">
+		select ifnull((select sum(platformincome) from finance where gmonewxid <![CDATA[ <> ]]> '' and to_days(time) = to_days(now())),0)+
+		ifnull((select sum(platformincome) from finance where gmtwowxid <![CDATA[ <> ]]> '' and to_days(time) = to_days(now())),0) as gm,
+		ifnull((select sum(platformincome) from finance where zyonewxid <![CDATA[ <> ]]> '' and to_days(time) = to_days(now())),0)+
+		ifnull((select sum(platformincome) from finance where zytwowxid <![CDATA[ <> ]]> '' and to_days(time) = to_days(now())),0) as zy,
+		ifnull((select sum(platformincome) from finance where xfonewxid <![CDATA[ <> ]]> '' and to_days(time) = to_days(now())),0)+
+		ifnull((select sum(platformincome) from finance where xftwowxid <![CDATA[ <> ]]> '' and to_days(time) = to_days(now())),0) as xf
+	</select>
+	<!-- 查询平台收入周报 -->
+	<select id="selectzb" resultType="java.util.HashMap">
+		select ifnull((select sum(platformincome) from finance where gmonewxid <![CDATA[ <> ]]> '' and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <![CDATA[<= ]]> date(time)),0)+
+		ifnull((select sum(platformincome) from finance where gmtwowxid <![CDATA[ <> ]]> '' and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <![CDATA[<= ]]> date(time)),0) as gm,
+		ifnull((select sum(platformincome) from finance where zyonewxid <![CDATA[ <> ]]> '' and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <![CDATA[<= ]]> date(time)),0)+
+		ifnull((select sum(platformincome) from finance where zytwowxid <![CDATA[ <> ]]> '' and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <![CDATA[<= ]]> date(time)),0) as zy,
+		ifnull((select sum(platformincome) from finance where xfonewxid <![CDATA[ <> ]]> '' and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <![CDATA[<= ]]> date(time)),0)+
+		ifnull((select sum(platformincome) from finance where xftwowxid <![CDATA[ <> ]]> '' and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <![CDATA[<= ]]> date(time)),0) as xf
+	</select>
+	<!-- 查询平台收入月报 -->
+	<select id="selectyb" resultType="java.util.HashMap">
+		select ifnull((select sum(platformincome) from finance where gmonewxid <![CDATA[ <> ]]> '' and DATE_FORMAT(time, '%Y%m' ) = DATE_FORMAT( CURDATE() , '%Y%m' )),0)+
+		ifnull((select sum(platformincome) from finance where gmtwowxid <![CDATA[ <> ]]> '' and DATE_FORMAT(time, '%Y%m' ) = DATE_FORMAT( CURDATE() , '%Y%m' )),0) as gm,
+		ifnull((select sum(platformincome) from finance where zyonewxid <![CDATA[ <> ]]> '' and DATE_FORMAT(time, '%Y%m' ) = DATE_FORMAT( CURDATE() , '%Y%m' )),0)+
+		ifnull((select sum(platformincome) from finance where zytwowxid <![CDATA[ <> ]]> '' and DATE_FORMAT(time, '%Y%m' ) = DATE_FORMAT( CURDATE() , '%Y%m' )),0) as zy,
+		ifnull((select sum(platformincome) from finance where xfonewxid <![CDATA[ <> ]]> '' and DATE_FORMAT(time, '%Y%m' ) = DATE_FORMAT( CURDATE() , '%Y%m' )),0)+
+		ifnull((select sum(platformincome) from finance where xftwowxid <![CDATA[ <> ]]> '' and DATE_FORMAT(time, '%Y%m' ) = DATE_FORMAT( CURDATE() , '%Y%m' )),0) as xf
+	</select>
+	<!-- 查询平台收入季报 -->
+	<select id="selectjb" resultType="java.util.HashMap">
+		select ifnull((select sum(platformincome) from finance where gmonewxid <![CDATA[ <> ]]> '' and QUARTER(time)=QUARTER(now())),0)+
+		ifnull((select sum(platformincome) from finance where gmtwowxid <![CDATA[ <> ]]> '' and QUARTER(time)=QUARTER(now())),0) as gm,
+		ifnull((select sum(platformincome) from finance where zyonewxid <![CDATA[ <> ]]> '' and QUARTER(time)=QUARTER(now())),0)+
+		ifnull((select sum(platformincome) from finance where zytwowxid <![CDATA[ <> ]]> '' and QUARTER(time)=QUARTER(now())),0) as zy,
+		ifnull((select sum(platformincome) from finance where xfonewxid <![CDATA[ <> ]]> '' and QUARTER(time)=QUARTER(now())),0)+
+		ifnull((select sum(platformincome) from finance where xftwowxid <![CDATA[ <> ]]> '' and QUARTER(time)=QUARTER(now())),0) as xf
+	</select>
+	<!-- 查询平台收入半年报 -->
+	<select id="selectbnb" resultType="java.util.HashMap">
+		select ifnull((select sum(platformincome) from finance where gmonewxid <![CDATA[ <> ]]> '' and time between date_sub(now(),interval 6 month) and now()),0)+
+		ifnull((select sum(platformincome) from finance where gmtwowxid <![CDATA[ <> ]]> '' and time between date_sub(now(),interval 6 month) and now()),0) as gm,
+		ifnull((select sum(platformincome) from finance where zyonewxid <![CDATA[ <> ]]> '' and time between date_sub(now(),interval 6 month) and now()),0)+
+		ifnull((select sum(platformincome) from finance where zytwowxid <![CDATA[ <> ]]> '' and time between date_sub(now(),interval 6 month) and now()),0) as zy,
+		ifnull((select sum(platformincome) from finance where xfonewxid <![CDATA[ <> ]]> '' and time between date_sub(now(),interval 6 month) and now()),0)+
+		ifnull((select sum(platformincome) from finance where xftwowxid <![CDATA[ <> ]]> '' and time between date_sub(now(),interval 6 month) and now()),0) as xf
+	</select>
+	<!-- 查询平台收入年报 -->
+	<select id="selectnb" resultType="java.util.HashMap">
+		select ifnull((select sum(platformincome) from finance where gmonewxid <![CDATA[ <> ]]> '' and year(time)=year(curdate())),0)+
+		ifnull((select sum(platformincome) from finance where gmtwowxid <![CDATA[ <> ]]> '' and year(time)=year(curdate())),0) as gm,
+		ifnull((select sum(platformincome) from finance where zyonewxid <![CDATA[ <> ]]> '' and year(time)=year(curdate())),0)+
+		ifnull((select sum(platformincome) from finance where zytwowxid <![CDATA[ <> ]]> '' and year(time)=year(curdate())),0) as zy,
+		ifnull((select sum(platformincome) from finance where xfonewxid <![CDATA[ <> ]]> '' and year(time)=year(curdate())),0)+
+		ifnull((select sum(platformincome) from finance where xftwowxid <![CDATA[ <> ]]> '' and year(time)=year(curdate())),0) as xf
+	</select>
+	<!-- 查询销售明细 -->
+	<select id="selectByXs" resultType="java.util.HashMap">
+		select 
+		e.type as type,es.number as number,p.name as name,f.emoney as money,f.gmonewxid as gmonewxid,f.gmonemoney as gmonemoney,f.gmtwowxid as gmtwowxid,f.gmtwomoney as gmtwomoney,f.fund as fund 
+		from finance as f 
+		left join equipmentsublist as es on f.eid = es.id
+		left join partnerequipment as pe on pe.eid = es.id
+		left join partner as p on pe.pid = p.id
+		left join equipment as e on es.eid = e.id
+		where f.type = 3
+	</select>
+	<!-- 押金收入明细 -->
+	<select id="selectByYj" resultType="java.util.HashMap">
+		select e.type as type,es.number as number,p.name as name,p.wxid as wxid, e.cashpledge as cashpledge,ml1.onwxid as onewxid,ml2.onwxid as twowxid
+		from partnerequipment as pe
+		left join equipmentsublist as es on es.id = pe.eid
+		left join equipment as e on e.id = es.eid
+		left join partner as p on p.id = pe.pid
+		left join memberonuplevel as ml1 on ml1.wxid = p.wxid
+		left join memberonuplevel as ml2 on ml2.wxid = ml1.onwxid
+		where pe.form = 1
+	</select>
+	<!-- 扫码收入分账、提成、公益金、基金明细 -->
+	<select id="selectfz" resultType="java.util.HashMap">
+		select es.number as number,f.time as time,p.wxid as pid,f.emoney as emoney,es.platformprice as platformincome,f.operatingincome as operatingincome,m3.wxid as zyonewxid,m3.mlid as onemlid,f.zyonemoney as zyonemoney,m4.wxid as zytwowxid,m4.mlid as twomlid,f.zytwomoney as zytwomoney,f.fund as fund,f.wxid as smwxid,f.xfonewxid as xfonewxid,f.xfonemoney as xfonemoney,f.xftwowxid as xftwowxid,f.xftwomoney as xftwomoney,f.operatingincome as op,f.platformincome as pl,f.ywfund as ywfund,f.wxfund as wxfund
+		from finance as f 
+		left join equipmentsublist as es on f.eid = es.id
+		left join partnerequipment as pe on f.eid = pe.eid
+		left join partner as p on pe.pid = p.id
+		left join member as m3 on f.zyonewxid = m3.wxid
+		left join member as m4 on f.zytwowxid = m4.wxid
+		where f.type <![CDATA[ <> ]]> 3
+	</select>
+	<!-- 公益金、基金账户收入明细表 -->
+	<select id="selectByFund" resultType="java.util.HashMap">
+		select f.time as time,f.type as type,es.number as number,f.fund as fund,f.wxfund as wxfund,f.ywfund as ywfund
+		from finance as f 
+		left join equipmentsublist as es on f.eid = es.id
+	</select>
+	<!-- 新增财务 -->
+	<insert id="insertfinance" parameterType="com.tly.model.Finance">
+		insert into finance(wxid,xfonewxid,xfonemoney,xftwowxid,xftwomoney,zyonewxid,zyonemoney,zytwowxid,zytwomoney,type,eid,emoney,num,fund,ywfund,wxfund,operatingincome,platformincome) 
+		values(#{wxid},#{xfonewxid},#{xfonemoney},#{xftwowxid},#{xftwomoney},#{zyonewxid},#{zyonemoney},#{zytwowxid},#{zytwomoney},#{type},#{eid},#{emoney},#{num},#{fund},#{ywfund},#{wxfund},#{operatingincome},#{platformincome})
+	</insert>
+	<!-- 按微信id查询收益记录 -->
+	<select id="selectByWxid" parameterType="java.lang.String" resultType="java.util.HashMap">
+		select f.id,es.id,m.id,pe.id,p.id
+		from finance as f 
+		left join equipmentsublist as es on f.eid = es.id
+		left join member as m on m.wxid = f.wxid
+		left join partnerequipment as pe on pe.eid = f.eid
+		left join partner as p on p.id = pe.pid
+		where f.xfonewxid = #{wxid} or f.xftwowxid = #{wxid} or f.gmonewxid = #{wxid} or f.gmtwowxid = #{wxid} or f.zyonewxid = #{wxid} or f.zytwowxid = #{wxid}
+		and DATE_SUB(CURDATE(), INTERVAL 6 DAY) <![CDATA[ <= ]]> date(f.time)
+	</select>
+	<!-- 查询没有看的财务数量 -->
+	<select id="selectByNotLookcount" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*)
+		from finance as f 
+		where (f.xfonewxid = #{wxid} and f.xfonelook = 2) or (f.xftwowxid = #{wxid} and f.xftwolook = 2) or (f.gmonewxid = #{wxid} and f.gmonelook = 2) or (f.gmtwowxid = #{wxid} and f.gmtwolook = 2)  or (f.zyonewxid = #{wxid} and f.zyonelook = 2) or (f.zytwowxid = #{wxid} and f.zytwolook = 2)
+	</select>
+	<!-- 按微信id查询财务 -->
+	<select id="selectByNotLook" parameterType="java.lang.String" resultType="com.tly.model.Finance">
+		select *
+		from finance as f 
+		where (f.xfonewxid = #{wxid} and f.xfonelook = 2) or (f.xftwowxid = #{wxid} and f.xftwolook = 2) or (f.gmonewxid = #{wxid} and f.gmonelook = 2) or (f.gmtwowxid = #{wxid} and f.gmtwolook = 2)  or (f.zyonewxid = #{wxid} and f.zyonelook = 2) or (f.zytwowxid = #{wxid} and f.zytwolook = 2)
+	</select>
+	<!-- 修改消费一级上线为已读 -->
+	<update id="updatexfone" parameterType="java.lang.Integer">
+		update finance set xfonelook = 1 where id = #{id}
+	</update>
+	<!-- 修改消费二级上线为已读 -->
+	<update id="updatexftwo" parameterType="java.lang.Integer">
+		update finance set xftwolook = 1 where id = #{id}
+	</update>
+	<!-- 修改租用一级上线为已读 -->
+	<update id="updatezyone" parameterType="java.lang.Integer">
+		update finance set zyonelook = 1 where id = #{id}
+	</update>
+	<!-- 修改租用二级上线为已读 -->
+	<update id="updatezytwo" parameterType="java.lang.Integer">
+		update finance set zytwolook = 1 where id = #{id}
+	</update>
+	<!-- 修改购买一级上线为已读 -->
+	<update id="updategmone" parameterType="java.lang.Integer">
+		update finance set gmonelook = 1 where id = #{id}
+	</update>
+	<!-- 修改购买二级上线为已读 -->
+	<update id="updategmtwo" parameterType="java.lang.Integer">
+		update finance set gmtwolook = 1 where id = #{id}
+	</update>
+	
+	<!-- 查找该用户近30天的收益记录 -->
+	<select id="selectEarningsByWxid" parameterType="java.lang.String" resultType="java.util.Map">
+		select y.money,y.type,y.time from(
+		(select if(f.xfonewxid = #{wxid},f.xfonemoney,0) as money,
+		if(f.xfonewxid = #{wxid},'一级消费提成','') as type,
+		f.time as time
+		from finance as f where f.xfonewxid = #{wxid}
+		) as y
+		)union all
+		select y.money,y.type,y.time from(
+		(select if(f.xftwowxid = #{wxid},f.xftwomoney,0) as money,
+		if(f.xftwowxid = #{wxid},'二级消费提成','') as type,
+		f.time as time
+		from finance as f where f.xftwowxid = #{wxid}
+		) as y
+		)union all
+		select y.money,y.type,y.time from(
+		(select if(f.zyonewxid = #{wxid},f.zyonemoney,0) as money,
+		if(f.zyonewxid = #{wxid},'一级租用提成','') as type,
+		f.time as time
+		from finance as f where f.zyonewxid = #{wxid}
+		) as y
+		)union all
+		select y.money,y.type,y.time from(
+		(select if(f.zytwowxid = #{wxid},f.zytwomoney,0) as money,
+		if(f.zytwowxid = #{wxid},'二级租用提成','') as type,
+		f.time as time
+		from finance as f where f.zytwowxid = #{wxid}
+		) as y
+		)union all
+		select y.money,y.type,y.time from(
+		(select if(f.gmonewxid = #{wxid},f.gmonemoney,0) as money,
+		if(f.gmonewxid = #{wxid},'一级购买提成','') as type,
+		f.time as time
+		from finance as f where f.gmonewxid = #{wxid}
+		) as y
+		)union all
+		select y.money,y.type,y.time from(
+		(select if(f.gmtwowxid = #{wxid},f.gmtwomoney,0) as money,
+		if(f.gmtwowxid = #{wxid},'二级购买提成','') as type,
+		f.time as time
+		from finance as f where f.gmtwowxid = #{wxid}
+		) as y
+		)
+	</select>
+</mapper>

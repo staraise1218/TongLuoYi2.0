@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 公益金、基金账户支出明细 -->
+<mapper namespace="com.tly.dao.IFundDao">
+	<!-- 新增 -->
+	<insert id="insert" parameterType="com.tly.model.Fund">
+		insert into fund(fundmoney,type,yue) values(#{fundmoney},#{type},#{yue})
+	</insert>
+	<!-- 查询余额 -->
+	<select id="selectByYe" parameterType="java.lang.Integer" resultType="java.lang.Double">
+		select (
+		select coalesce(sum(fund),0) from finance)-
+		(select coalesce(sum(fundmoney),0) from fund where type = #{type})as money
+	</select>
+	<!-- 查询 -->
+	<select id="select" resultType="com.tly.model.Fund">
+		select * from fund
+	</select>
+</mapper>

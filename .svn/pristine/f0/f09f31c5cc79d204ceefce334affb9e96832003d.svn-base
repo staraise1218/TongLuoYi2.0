@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.2.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-4.2.xsd 
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+	
+	<!-- 1、配置数据源 -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://192.168.1.180/tly"/>
+		<property name="username" value="root"/>
+		<property name="password" value="root"/>
+	</bean>
+	
+	<!-- 配置mybitasSqlSessionFactoryBean -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:MyBatis-Configuration.xml"></property>
+	</bean>
+	<!-- a、事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- b、配置事务策略 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- c、定义哪些方法(AOP切入点)会使用事务 -->
+	<aop:config>
+		<aop:pointcut id="productServiceMethods"
+			expression="execution(* com.tly.service.*.*(..))" /><!--业务类方法路径  -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods" />
+	</aop:config>
+	
+	<!-- 在企业级应用中，经常会制定一些“计划任务”，即在某个时间点做某件事情
+			核心是以时间为关注点，即在一个特定的时间点，系统执行指定的一个操作
+			任务调度涉及多线程并发、线程池维护、运行时间规则解析、运行现场的保护以恢复等方面
+	 -->
+	<!-- Quartz对任务调度进行了高度抽象，提出了3个核心概念，并在org.quartz包中通过接口和类进行了描述
+			任务：就是执行的工作内容。Quartz提供Job接口来支持任务定义
+			触发器：定义触发Job执行的时间触发规则。Quartz提供Trigger类及其子类支持触发器功能，
+			调度器：Quartz提供了Scheduler接口，将工作任务和触发器绑定，保证任务可以在正确的时间执行
+	 -->
+	<!-- 配置MethodInvokingJobDetailFactoryBean -->
+	<bean id="job" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+		<property name="targetObject">  
+			<bean class="com.tly.service.impl.EvaluateService" />  
+		</property>  
+		<property name="targetMethod" value="timingupdatevisible" />  
+	</bean>
+	<!-- 配置触发器  -->
+	<bean name="updateMexptimeEveryDay" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<!--配置JobDetail-->
+		<property name="jobDetail" ref="job"></property>
+		<!--配置Cron表达式-->
+		<property name="cronExpression" value="0 15 10 L * ?"></property>
+	</bean>
+	<!-- 配置调度器 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<!--指定触发器-->
+				<ref bean="updateMexptimeEveryDay"/>
+				<!--可以在这里添加其他的触发器-->
+			</list>
+		</property>
+	</bean>
+</beans>

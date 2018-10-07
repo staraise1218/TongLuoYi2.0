@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 会员钱包 -->
+<mapper namespace="com.tly.dao.IMemberWalletDao">
+	<select id="selectRemainMoney" parameterType="java.lang.String" resultType="java.lang.Double">
+		select money from memberwallet where wxid = #{wxid}
+	</select>
+	<!-- 修改会员钱包 -->
+	<update id="updateByMemberWallet" parameterType="com.tly.model.MemberWallet">
+		update memberwallet set money = money+#{money} where wxid=#{wxid}
+	</update>
+	<!-- 修改钱包余额 -->
+	<update id="updateMoneyByWxid" parameterType="java.util.Map">
+		update memberwallet set money = money - #{money} where wxid = #{wxid}
+	</update>
+</mapper>
